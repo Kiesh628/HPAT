@@ -1,6 +1,6 @@
 import streamlit as st
 
-def main():
+def main():    
     st.set_page_config('HPAT','♨️','wide')
     
     st.title('HPAT - Heap Pump Analysis Tool')
@@ -121,6 +121,137 @@ def main():
     
     st.divider()
     
+    default_refrigs_dict = {'Domestic': dict(zip(Domestic_Options,[['R410A','R32','R290','R1234ze(E)'],
+                                                              ['R134a','R290','R1234ze(E)','R600a'],
+                                                              ['R134a','R290','R1234yf','R600a'],
+                                                              ['R32','R290','R1234yf','R134a'],
+                                                              ['R32','R290','R1234yf','R410A']])),
+                       'Commerical': dict(zip(Commercial_Options,[['R290','R134a','R1234ze(E)','R600a'],
+                                                                  ['R600a','R717','R1234ze(E)','R1233zd(E)'],
+                                                                  ['R410A','R32','R290','R1234ze(E)'],
+                                                                  ['R1234ze(E)','R600','R717','R245fa'],])),
+                       'Industrial': dict(zip(Industrial_Options,[['1233zd(E)','R717','R245fa','R600a'],
+                                                                  ['R600a','R1233zd(E)','R245fa','R718'],
+                                                                  ['R245fa','R601','R1233zd(E)','R601a'],
+                                                                  ['R245fa','R1233zd(E)','R600','R717'],
+                                                                  ['R1234ze(E)','R1234yf','R290','R245fa'],
+                                                                  ['R717','R1234ze(Z)','R245fa','R600'],
+                                                                  ['R600','R245fa','R601','R1233zd(E)'],
+                                                                  ['R290','R134a','R1234ze(Z)','R717']]))
+                       }
+    
+    max_cond_temp = {'R717': 122,
+                     'CarbonDioxide': 21,
+                     'CycloHexane': 270,
+                     'Cyclopentane': 228,
+                     'CycloPropane': 116,
+                     'IsoButane': 124,
+                     'R601a': 177,
+                     'n-Butane': 143,
+                     'n-Octane': 286,
+                     'R601': 186,
+                     'R290': 87,
+                     'Neopentane': 151,
+                     'R11': 188,
+                     'R12': 102,
+                     'R13': 19,
+                     'R21': 169,
+                     'R22': 86,
+                     'R23': 16,
+                     'R32': 68,
+                     'R40': 134,
+                     'R113': 204,
+                     'R114': 136,
+                     'R115': 70,
+                     'R116': 10,
+                     'R123': 174,
+                     'R1233zd(E)': 156,
+                     'R1234yf': 85,
+                     'R1234ze(E)':99,
+                     'R1234ze(Z)': 160,
+                     'R124': 112,
+                     'R1243zf': 87,
+                     'R125': 57,
+                     'R134a': 92,
+                     'R141b': 194,
+                     'R142b': 128,
+                     'R143a': 63,
+                     'R152A': 104,
+                     'R161': 92,
+                     'R218': 62,
+                     'R227EA': 93,
+                     'R236EA': 129,
+                     'R236FA': 115,
+                     'R245ca': 164,
+                     'R245fa': 144,
+                     'R365MFC': 151,
+                     'R404A': 63,
+                     'R407C': 77,
+                     'R410A': 62,
+                     'R507A': 61,
+                     'SulfurDioxide': 310,
+                     'R718': 364
+                     }
+    
+    refrigs_list = list(max_cond_temp.keys())
+    
+    emojis = ['1️⃣','2️⃣','3️⃣','4️⃣']
+    
+    st.session_state.setdefault('selected_refrigs',default_refrigs_dict[Application_Type][Application])
+    st.session_state.setdefault('edit_mode',None)
+    
+    st.header(f'3️⃣ Select Refrigerants (up to 4)')
+
+    if len(st.session_state['selected_refrigs']) > 0:
+        for i, current_refrig in enumerate(st.session_state['selected_refrigs']):
+            with st.container():
+                col51, col52, col53, col54 = st.columns([0.2,2,0.5,0.5])
+                
+                with col51:
+                    st.subheader(emojis[i])
+                    
+                with col52:
+                    if st.session_state['edit_mode'] == i:
+                        taken_refrigs = [r for idx, r in enumerate(st.session_state['selected_refrigs']) if idx != i]
+                        available_refrigs = [r for r in refrigs_list if r not in taken_refrigs]
+                        new_refrig = st.selectbox('Refrigerant', available_refrigs,index=available_refrigs.index(current_refrig),key=f'{i}_dropdown',label_visibility='collapsed')
+                    else:
+                        st.subheader(current_refrig)
+
+                with col53:
+                    if st.session_state['edit_mode'] == i:
+                        if st.button('Save', key=f'{i}_save', icon='✅'):
+                            st.session_state['selected_refrigs'][i] = new_refrig #type:ignore
+                            st.session_state['edit_mode'] = None
+                            st.rerun()
+                    else:
+                        if st.button('Edit', key=f'{i}_edit', icon='✏️'):
+                            st.session_state['edit_mode'] = i
+                            st.rerun()
+                
+                with col54:
+                    if st.button('Remove', key=f'{i}_remove', icon='❌', type='primary'):
+                        st.session_state['selected_refrigs'].pop(i)
+                        st.session_state['edit_mode'] = None
+                        st.rerun()
+    else:
+        st.header('📦', text_alignment='center')
+        st.subheader('No refrigerants selected', text_alignment='center')
+        st.caption('Click "Add Refrigerant" to get started', text_alignment='center')
+    
+    if len(st.session_state['selected_refrigs']) < 4:
+        if st.button(f'➕ Add Refrigerant ({len(st.session_state['selected_refrigs'])}/4)',width='stretch'):
+            st.selectbox('Select',refrigs_list,placeholder='🔎 Search refrigerants...')
+            
+      
+    if len(st.session_state['selected_refrigs']) == 4:
+        st.caption('4/4 refrigerants selected • Maximum reached')
+    else:
+        st.caption(f'{len(st.session_state['selected_refrigs'])}/4 refrigerants selected')
+                
+        
+            
+        
     
     
     return
