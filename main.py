@@ -397,8 +397,6 @@ def main():
                     evap_cap = mass_flow * ((h1 - h4) / 1000.0)
                     comp_power = mass_flow * w_comp
                     
-                    # Carnot COP: use T1 (actual suction temp = T_evap + superheat) as cold side
-                    # This matches the ISHRAE website formula: T_cond / (T_cond - T1)
                     cop_carnot = T_cond_K / (T_cond_K - T1)
                     exergy_eff = (cop_actual / cop_carnot) * 100.0
 
@@ -745,7 +743,7 @@ def main():
                                         marker=dict(color='red', size=10, symbol='circle'),
                                         text=[f"({h:.2f}, {p:.2f})" for h, p in zip(ip['h'], ip['P'])],
                                         textposition='top right', textfont=dict(color='red', size=10)))
-                                fig_ph.update_layout(xaxis_title="Enthalpy (kJ/kg)", yaxis_title="Pressure (bar)", yaxis_type='log' if upgraded else 'linear', height=400, margin=dict(l=20, r=20, t=20, b=20))
+                                fig_ph.update_layout(xaxis_title="Enthalpy (kJ/kg)", yaxis_title="Pressure (bar)", yaxis_type='log' if fixed else 'linear', height=400, margin=dict(l=20, r=20, t=20, b=20))
                                 st.plotly_chart(fig_ph, width='stretch')
     
     return
