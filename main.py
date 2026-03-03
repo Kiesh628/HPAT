@@ -201,7 +201,7 @@ def main():
 
     refrigs_valid = True
     error_string = None
-    if min(refrigerant_data[refrig]['max_temp'] for refrig in st.session_state['selected_refrigs']) < Cond_Temp:
+    if len(st.session_state['selected_refrigs']) > 0 and min(refrigerant_data[refrig]['max_temp'] for refrig in st.session_state['selected_refrigs']) < Cond_Temp:
         refrigs_valid = False
         error_string = f"The following refrigerant(s) cannot operate at the selected condensing temperature ({Cond_Temp}°C):  \n"
         for refrig in st.session_state['selected_refrigs']:
