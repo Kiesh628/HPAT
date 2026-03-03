@@ -321,12 +321,9 @@ def main():
             
             Cp_water = 4.2
 
-            _ETA_A, _ETA_B, _ETA_C = 0.395831, 0.176590, -0.027411
-            def get_eta_is(cond_t, evap_t, ref):
-                P1 = cp.PropsSI('P', 'T', evap_t + 273.15, 'Q', 1, ref)
-                P2 = cp.PropsSI('P', 'T', cond_t + 273.15, 'Q', 0, ref)
-                PR = P2 / P1
-                return max(0.50, min(0.95, _ETA_A + _ETA_B * PR + _ETA_C * PR * PR))
+            ETA_IS = 0.678  # fixed value matching the ISHRAE API
+            def get_eta_is(*args, **kwargs):
+                return ETA_IS
 
             grid_ef    = 0.913 
             leak_rate  = 0.02
@@ -400,7 +397,9 @@ def main():
                     evap_cap = mass_flow * ((h1 - h4) / 1000.0)
                     comp_power = mass_flow * w_comp
                     
-                    cop_carnot = T_cond_K / (T_cond_K - T_evap_K)
+                    # Carnot COP: use T1 (actual suction temp = T_evap + superheat) as cold side
+                    # This matches the ISHRAE website formula: T_cond / (T_cond - T1)
+                    cop_carnot = T_cond_K / (T_cond_K - T1)
                     exergy_eff = (cop_actual / cop_carnot) * 100.0
 
                     T_crit = cp.PropsSI('Tcrit', refrig)
